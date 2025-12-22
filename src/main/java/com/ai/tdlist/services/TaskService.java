@@ -1,15 +1,17 @@
 package com.ai.tdlist.services;
 
-import com.ai.tdlist.constants.Oprations;
 import com.ai.tdlist.dtos.Task;
 import com.ai.tdlist.enums.TaskStatus;
 import com.ai.tdlist.exceptions.RepoCreateException;
+import com.ai.tdlist.exceptions.RepoDeleteException;
+import com.ai.tdlist.exceptions.RepoFetchException;
+import com.ai.tdlist.exceptions.RepoUpdateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
+import java.util.List;
 
 @Service
 public class TaskService {
@@ -28,19 +30,50 @@ public class TaskService {
           catch (Exception e)
         {
             logger.error("Error occurred while creating task: {}", e.toString());
-            throw new RepoCreateException(e.toString());
+            throw new RepoCreateException(e.toString(),e);
         }
 
     }
-    public boolean updateTask(Task task)
-    {
-        return true;
+    public Task updateTask(Task task) {
+        try {
+            logger.info("Updating task in DB: {}", task);
+            Task updatedTask = repoService.updateTask(task);
+            logger.info("Updated task: {}", updatedTask);
+            return updatedTask;
+        }
+        catch(Exception e)
+        {
+            logger.error("Error occurred while updating task: {}", e.toString());
+            throw new RepoUpdateException(e.toString(),e);
+        }
     }
-    public boolean deleteTask(UUID key)
+    public void deleteTask(int key)
     {
-        return true;
+        try {
+            logger.info("Deleting task from DB with key: {}", key);
+            repoService.deleteTask(key);
+        }
+        catch(Exception e)
+        {
+            logger.error("Error occurred while deleting task: {}", e.toString());
+            throw new RepoDeleteException(e.toString(),e);
+        }
+
     }
-    private Task validateTask(Task task)
+    public List<Task> getTasksByStatus(TaskStatus status)
+    {
+        try {
+            logger.info("Fetching tasks from DB with status: {}", status);
+            return repoService.getTasksByFilters(status);
+        }
+        catch(Exception e)
+        {
+            logger.error("Error occurred while fetching tasks: {}", e.toString());
+            throw new RepoFetchException(e.toString(),e);
+        }
+    }
+
+    private void validateTask(Task task)
     {
         if(task.getDescription()==null || task.getDescription().isEmpty())
         {
@@ -60,6 +93,5 @@ public class TaskService {
             logger.warn("Task time is null. Setting default time to current time.");
             task.setTime(new java.sql.Time(System.currentTimeMillis()));
         }
-        return task;
     }
 }

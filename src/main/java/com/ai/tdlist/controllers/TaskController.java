@@ -1,12 +1,13 @@
 package com.ai.tdlist.controllers;
 
 import com.ai.tdlist.dtos.Task;
+import com.ai.tdlist.enums.TaskStatus;
 import com.ai.tdlist.exceptions.RepoCreateException;
 import com.ai.tdlist.services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.UUID;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,21 +26,26 @@ public class TaskController {
         return ResponseEntity.ok().body(createdTask);
     }
     @PatchMapping("/task/update")
-    public boolean updateTask(@RequestBody Task task)
+    public ResponseEntity<Task> updateTask(@RequestBody Task task)
     {
-        taskService.updateTask(task);
-        return true;
+        logger.info("Received request to update task: {}", task);
+         Task updatedTask= taskService.updateTask(task);
+         return ResponseEntity.ok().body(updatedTask);
+
     }
     @DeleteMapping("/task/delete/{key}")
-    public boolean deleteTask(@PathVariable UUID key)
+    public ResponseEntity<String> deleteTask(@PathVariable int key)
     {
+        logger.info("Received request to delete task with key: {}", key);
         taskService.deleteTask(key);
-        return true;
+        return ResponseEntity.ok().body("Task with key " + key + " deleted successfully.");
     }
-    @GetMapping("/task/delete/{key}")
-    public String getTask()
+    @GetMapping("/task/get")
+    public ResponseEntity<List<Task>> getTask(@RequestParam(name = "status") TaskStatus status)
     {
-        return "";
+        logger.info("Received request to get tasks with status: {}", status);
+        List<Task> tasks= taskService.getTasksByStatus(status);
+        return ResponseEntity.ok().body(tasks);
     }
 
 }

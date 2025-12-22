@@ -1,31 +1,37 @@
 package com.ai.tdlist.mappers;
 
 import com.ai.tdlist.dtos.Task;
-import com.ai.tdlist.entities.Taskentite;
+import com.ai.tdlist.entities.TaskEntity;
 import com.ai.tdlist.enums.TaskStatus;
 import org.springframework.stereotype.Service;
-
+import java.util.List;
 @Service
 public class MapTask {
-    public Taskentite mapToEntity(Task task)
+    public TaskEntity mapToEntity(Task task)
     {
-        Taskentite taskentite=new Taskentite();
-        taskentite.setName(task.getName());
-        taskentite.setDescription(task.getDescription());
-        taskentite.setDate(task.getDate());
-        taskentite.setTime(task.getTime());
-        taskentite.setStatus(task.getStatus().getStatus());
-        return taskentite;
+        TaskEntity taskEntity =new TaskEntity();
+        taskEntity.setName(task.getName());
+        taskEntity.setDescription(task.getDescription());
+        taskEntity.setDate(task.getDate());
+        taskEntity.setTime(task.getTime());
+        taskEntity.setStatus(task.getStatus().getStatusValue());
+        return taskEntity;
     }
-    public Task mapToDto(Taskentite taskentite)
+    public Task mapToDto(TaskEntity taskEntity)
     {
         Task task=new Task();
-        task.setId(taskentite.getId());
-        task.setName(taskentite.getName());
-        task.setDescription(taskentite.getDescription());
-        task.setDate(taskentite.getDate());
-        task.setTime(taskentite.getTime());
-        task.setStatus(TaskStatus.valueOf(taskentite.getStatus()));
+        task.setId(taskEntity.getId());
+        task.setName(taskEntity.getName());
+        task.setDescription(taskEntity.getDescription());
+        task.setDate(taskEntity.getDate());
+        task.setTime(taskEntity.getTime());
+        task.setStatus(TaskStatus.valueOf(taskEntity.getStatus()));
         return task;
+    }
+
+    public List<Task> mapToDtoList(List<TaskEntity> taskEntities) {
+        return taskEntities.stream()
+                .map(this::mapToDto)
+                .toList();
     }
 }
