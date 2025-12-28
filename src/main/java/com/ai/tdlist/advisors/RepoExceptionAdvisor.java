@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.ai.tdlist.advisors.Helper.buildResponseEntity;
+
 @ControllerAdvice
-public class ExceptionAdvisor {
-    private static final Logger logger = LoggerFactory.getLogger(ExceptionAdvisor.class);
+public class RepoExceptionAdvisor {
+    private static final Logger logger = LoggerFactory.getLogger(RepoExceptionAdvisor.class);
 
 
     @ExceptionHandler(RepoCreateException.class)
@@ -67,16 +70,5 @@ public class ExceptionAdvisor {
         return buildResponseEntity("Malformed JSON Request, "+httpMessageNotReadableException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    //TODO :: Check if this still needed
-    @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<String> handlerEntityNotFoundException(EntityNotFoundException httpMessageNotReadableException) {
-        logger.error("Entity Not Found Exception: {}", httpMessageNotReadableException.getMessage());
-        // implement further handling logic for publishing to kafka topic
-        return new ResponseEntity<>("Entity Not Found, "+httpMessageNotReadableException.getMessage(), HttpStatus.NOT_FOUND);
-    }
 
-    private ResponseEntity<String> buildResponseEntity(String message, HttpStatus status) {
-        return new ResponseEntity<>(message, status);
-    }
 }

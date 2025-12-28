@@ -1,5 +1,6 @@
 package com.ai.tdlist.config;
 
+import com.ai.tdlist.filter.JwtAuthenticationFilter;
 import com.ai.tdlist.services.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,21 +15,29 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     @Autowired
     MyUserDetailsService myUserDetailsService;
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private ApplicationProperties applicationProperties;
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
         .csrf(customizer -> customizer.disable())
-        .authorizeHttpRequests(request -> request.requestMatchers("/security/csrf-token","/security/register","/security/login").permitAll()
+        .authorizeHttpRequests(request -> request.requestMatchers(applicationProperties.getServiceUrls()).permitAll()
                 .anyRequest().authenticated())
         .formLogin(Customizer.withDefaults())
         .httpBasic(Customizer.withDefaults())
        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
     }
     @Bean
@@ -40,6 +49,7 @@ public class SecurityConfig {
         authProvider.setUserDetailsService(myUserDetailsService);
         return authProvider;
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

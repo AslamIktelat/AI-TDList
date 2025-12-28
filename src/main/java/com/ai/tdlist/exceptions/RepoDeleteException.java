@@ -3,10 +3,8 @@ package com.ai.tdlist.exceptions;
 import lombok.Getter;
 
 @Getter
-public class RepoDeleteException extends RuntimeException {
-    private final Exception rootException;
+public class RepoDeleteException extends ControllerException {
     public RepoDeleteException(String message,Exception rootException) {
-        super(message);
-        this.rootException=rootException;
+        super(message, rootException);
     }
 }

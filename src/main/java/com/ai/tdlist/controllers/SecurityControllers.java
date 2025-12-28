@@ -1,14 +1,11 @@
 package com.ai.tdlist.controllers;
 
 import com.ai.tdlist.entities.UserEntity;
-import com.ai.tdlist.repository.UserRepository;
-import com.ai.tdlist.services.JWTService;
+import com.ai.tdlist.services.SecurityService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,31 +13,20 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/security")
 public class SecurityControllers {
     @Autowired
-    UserRepository userRepository;
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    JWTService jwtService;
+    SecurityService securityService;
 
     @GetMapping("/csrf-token")
-    public CsrfToken getCsrfToken(HttpServletRequest request) {
-     return (CsrfToken) request.getAttribute("_csrf");
+    public ResponseEntity<CsrfToken> getCsrfToken(HttpServletRequest request) {
+        //** No token will be returned since it's toggled off in config **//
+     return new ResponseEntity<>((CsrfToken) request.getAttribute("_csrf"), HttpStatus.OK);
     }
 
     @PostMapping("/register")
-    public UserEntity registerUser(@RequestBody UserEntity userEntity) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
-        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
-        return userRepository.save(userEntity);
+    public ResponseEntity<UserEntity> registerUser(@RequestBody UserEntity userEntity) {
+       return new ResponseEntity<>(securityService.registerUser(userEntity), HttpStatus.CREATED);
     }
     @GetMapping("/login")
-    public String login(@RequestBody UserEntity userEntity) {
-        Authentication authentication=authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                userEntity.getUsername(), userEntity.getPassword()));
-        if(authentication.isAuthenticated()) {
-            return jwtService.generateToken(userEntity.getUsername());
-        }
-
-        return "Login failed";
+    public ResponseEntity<String> login(@RequestBody UserEntity userEntity) {
+        return new ResponseEntity<>(securityService.login(userEntity), HttpStatus.OK);
     }
 }

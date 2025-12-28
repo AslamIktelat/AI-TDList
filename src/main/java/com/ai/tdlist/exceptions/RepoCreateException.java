@@ -4,12 +4,9 @@ package com.ai.tdlist.exceptions;
 import lombok.Getter;
 
 @Getter
-public class RepoCreateException extends RuntimeException {
+public class RepoCreateException extends ControllerException {
 
-    private final Exception rootException;
     public RepoCreateException(String message,Exception rootException) {
-
-        super(message);
-        this.rootException=rootException;
+        super(message, rootException);
     }
 }
