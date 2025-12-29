@@ -8,6 +8,6 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application from the JAR
-FROM openjdk:11
+FROM openjdk:17-slim
 COPY --from=build /target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
